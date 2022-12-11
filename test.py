@@ -14,6 +14,7 @@ imgSize = 300
 
 while True:
     success, img = cap.read()
+    imgOutput = img.copy() # taking a copy of the orginal image (from the video frame)
     hands, img = detector.findHands(img)
     try:
         if hands:
@@ -52,12 +53,16 @@ while True:
                 hGap = math.ceil((imgSize - hCal) / 2)
                 # adding detected hand on top of imgWhite
                 imgWhite[hGap:hCal + hGap, :] = imgResize
+                # adding the classifier
+                prediction, index = classifier.getPrediction(img)
+
+            cv2.putText(imgOutput, labels[index], (x, y-20), cv2.FONT_HERSHEY_COMPLEX, 2, (255, 255, 0), 2)
 
             cv2.imshow('ImageCrop', imgCrop)
             cv2.imshow('ImgeWhite', imgWhite)
     except:
         pass
-    cv2.imshow('Image', img)
+    cv2.imshow('Image', imgOutput)
     k = cv2.waitKey(1)
     if k == 27:
         cv2.destroyWindow()
