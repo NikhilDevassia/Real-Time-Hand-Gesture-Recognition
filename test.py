@@ -1,16 +1,16 @@
 import cv2
 from cvzone.HandTrackingModule import HandDetector
+from cvzone.ClassificationModule import Classifier
 import numpy as np
 import math
 import time 
 
 cap = cv2.VideoCapture(0)
 detector = HandDetector(maxHands=1)
+classifier = Classifier('model/keras_model.h5', 'model/labels.txt')
+labels = ['A', 'B', 'C']
 offset = 20
 imgSize = 300
-
-folder = 'Data/C'
-counter = 0
 
 while True:
     success, img = cap.read()
@@ -40,6 +40,9 @@ while True:
                 wGap = math.ceil((imgSize - wCal) / 2)
                 # adding detected hand on top of imgWhite
                 imgWhite[:, wGap:wCal+wGap] = imgResize
+                # adding the classifier
+                prediction, index = classifier.getPrediction(img)
+                # print(prediction, index)
             else:
                 k = imgSize / w  # stretching the height
                 hCal = math.ceil(k * h)  # mul k with the previous width and also adding math.ceil (if wCal= 3.5 => 4)
@@ -56,9 +59,5 @@ while True:
         pass
     cv2.imshow('Image', img)
     k = cv2.waitKey(1)
-    if k == ord('s'):
-        cv2.imwrite(f'{folder}/Image_{time.time()}.jpg', imgWhite) # time.time() will give different values
-        counter += 1
-        print(counter)
     if k == 27:
         cv2.destroyWindow()
